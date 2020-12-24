@@ -265,6 +265,102 @@ function createSky(){
 
     sky.mesh.position.y = -600;
     scene.add(sky.mesh);
+};
+
+const AirPlane = function(){
+    this.mesh = new THREE.Object3D();
+
+    //создаем кабину
+    let cockpitGeom = new THREE.BoxGeometry(60 ,50, 50, 1, 1, 1);
+    let cockpitMat = new THREE.MeshPhongMaterial({
+        color: colors.red,
+        shading: THREE.FlatShading
+    });
+
+    let cockpit = new THREE.Mesh(cockpitGeom, cockpitMat);
+    cockpit.castShadow = true;
+    cockpit.receiveShadow = true;
+
+    this.mesh.add(cockpit);
+
+    //создаем мотор
+    let geomEngine = new THREE.BoxGeometry(20, 50, 50, 1, 1, 1);
+    let matEngine = new THREE.MeshPhongMaterial({
+        color: colors.white,
+        shading: THREE.FlatShading
+    });
+
+    let engine = new THREE.Mesh(geomEngine, matEngine);
+    engine.position.x = 40;
+    engine.castShadow = true;
+    engine.receiveShadow = true;
+
+    this.mesh.add(engine);
+
+    //создаем хвост
+    let geomTailPlane = new THREE.BoxGeometry(15, 20, 50, 1, 1, 1);
+    let matTailPlane = new THREE.MeshPhongMaterial({
+        color: colors.red,
+        shading: THREE.FlatShading
+    });
+
+    let tailPlane = new THREE.Mesh(geomTailPlane, matTailPlane);
+    tailPlane.position.set(-25, 35, 0);
+    tailPlane.castShadow = true;
+    tailPlane.receiveShadow = true;
+
+    this.mesh.add(tailPlane);
+
+    //создаем крыло
+    let geomSideWing = new THREE.BoxGeometry(40, 8, 150, 1, 1, 1);
+    let matSideWing = new THREE.MeshPhongMaterial({
+        color: colors.red,
+        shading: THREE.FlatShading
+    });
+
+    let sideWing = new THREE.Mesh(geomSideWing, matSideWing);
+    sideWing.castShadow = true;
+    sideWing.receiveShadow = true;
+    this.mesh.add(sideWing);
+
+    //попеллер
+    let geomPropeller = new THREE.BoxGeometry(20, 10 ,10, 1, 1, 1);
+    let matPropeller = new THREE.MeshPhongMaterial({
+        color: colors.brown,
+        shading: THREE.FlatShading
+    });
+    this.propeller = new THREE.Mesh(geomPropeller, matPropeller);
+    this.propeller.castShadow = true;
+    this.propeller.receiveShadow = true;
+
+    //лезвия
+    let geomBlade = new THREE.BoxGeometry(1, 100, 20, 1, 1, 1);
+    let matBlade = new THREE.MeshPhongMaterial({
+        color: colors.brownDark,
+        shading: THREE.FlatShading
+    });
+    let blade = new THREE.Mesh(geomBlade, matBlade);
+    blade.position.set(8, 0, 0);
+    blade.castShadow = true;
+    blade.receiveShadow = true;
+
+    this.propeller.add(blade);
+    this.propeller.position.set(50, 0, 0);
+
+    this.mesh.add(this.propeller);
+
+};
+
+//добавляем самолет на сцену
+let airplane;
+
+function createPlane(){
+    airplane = new AirPlane();
+
+    airplane.mesh.scale.set(0.25, 0.25, 0.25);
+    airplane.mesh.position.y = 100;
+
+    scene.add(airplane.mesh);
 }
 
 function init(){
@@ -275,7 +371,7 @@ function init(){
     createLights();
 
     //insertion main object's
-    // createPlane();
+    createPlane();
     createSea();
     createSky();
 
