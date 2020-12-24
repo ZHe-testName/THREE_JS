@@ -13,56 +13,41 @@ const colors = {
     blue: 0x68c3c0,
 };
 
-const container = document.getElementById('world');
-const renderer = new THREE.WebGLRenderer({canvas: container}); 
+// const renderer = new THREE.WebGLRenderer({canvas: container}); 
+let scene,
+	camera, fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH,
+	renderer, container;
 
-let height = window.innerHeight;
-let width = window.innerWidth;
+// let height = window.innerHeight;
+// let width = window.innerWidth;
 
-let asperateRatio = width / height;
-let fieldOfView = 60;
-let nearPlane = 1;
-let farPlane = 10000;
+// let asperateRatio = width / height;
+// let fieldOfView = 60;
+// let nearPlane = 1;
+// let farPlane = 10000;
 
 
-let scene;
+// let scene;
 
 window.addEventListener('load', init, false);
-
-const Sea = function(){
-    // create the geometry (shape) of the cylinder;
-	// the parameters are: 
-    // radius top, radius bottom, height, number of segments on the radius, number of segments vertically
-    let geometry = new THREE.CylinderGeometry(600, 600, 800, 40, 10);
-
-    // rotate the geometry on the x axis
-    geometry.applyMatrix(new THREE.Matrix4().makeRotationX(Math.PI / 2));
-
-    // create the material 
-    let material = new THREE.MeshPhongMaterial({
-        color: colors.blue,
-        transparent: true,
-        opacity: 0.6,
-        shading: THREE.FlatShading,
-    });
-
-    // To create an object in Three.js, we have to create a mesh 
-    // which is a combination of a geometry and some material
-    
-    this.mesh = new THREE.Mesh(geometry, material);
-    
-    // Allow the sea to receive shadows
-    this.mesh.receiveShadow = true;
-};
-
 //Create camera
-let camera = new THREE.PerspectiveCamera(asperateRatio, fieldOfView, nearPlane, farPlane);
+// let camera = new THREE.PerspectiveCamera(asperateRatio, fieldOfView, nearPlane, farPlane);
+
+function handleWindowResize() {
+	// update height and width of the renderer and the camera
+	HEIGHT = window.innerHeight;
+	WIDTH = window.innerWidth;
+	renderer.setSize(WIDTH, HEIGHT);
+	camera.aspect = WIDTH / HEIGHT;
+	camera.updateProjectionMatrix();
+};
 
 function createScene(){
     //get width and height of screen 
     //use them to set up the aspect ratio of the camera 
     //and the size of a renderer
-
+    HEIGHT = window.innerHeight;
+	WIDTH = window.innerWidth;
 
     //Create scene
     scene = new THREE.Scene();
@@ -70,57 +55,63 @@ function createScene(){
     //Add fog to scene
     scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
 
+    // Create the camera
+	aspectRatio = WIDTH / HEIGHT;
+	fieldOfView = 60;
+	nearPlane = 1;
+	farPlane = 10000;
+	camera = new THREE.PerspectiveCamera(
+		fieldOfView,
+		aspectRatio,
+		nearPlane,
+		farPlane
+		);
+	
+
     //set the camera position
     camera.position.x = 0;
     camera.position.y = 100;
     camera.position.z = 200;
 
     //Create the renderer
-    let renderer = new THREE.WebGLRenderer({
+    renderer = new THREE.WebGLRenderer({
         //Allow transparency to show gradient collor of bgcolor 
         // we set in css
         alpha: true,
 
         // Activate the anti-aliasing; this is less performant,
-		// but, as our project is low-poly based, it should be fine :)
-		antialias: true,
+        // but, as our project is low-poly based, it should be fine :)
+        antialias: true,
     });
 
     // Define the size of the renderer; in this case,
     // it will fill the entire screen
-    renderer.setSize(width, height);
+    renderer.setSize(WIDTH, HEIGHT);
 
     //Enable shadow rendering
     renderer.shadowMap.enabled = true;
 
     // Add the DOM element of the renderer to the 
     // container we created in the HTML
+    container = document.getElementById('world');
     container.appendChild(renderer.domElement);
     
     // Listen to the screen: if the user resizes it
     // we have to update the camera and the renderer size
-    window.addEventListener('resize', hendleWindowResize, false);
+    window.addEventListener('resize', handleWindowResize, false);
 };
 
-function hendleWindowResize(){
-    // update height and width of the renderer and the camera
-    height = window.innerHeight;
-    width = window.innerWidth;
-
-    renderer.setSize(width, height);
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-};
+let hemisphereLight, shadowLight;
 
 function createLights(){
     // A hemisphere light is a gradient colored light; 
 	// the first parameter is the sky color, the second parameter is the ground color, 
     // the third parameter is the intensity of the light
-    let hemisphereLight = new THREE.HemisphereLight(0xaaaaaa,0x000000, 0.9);
+    hemisphereLight = new THREE.HemisphereLight(0xaaaaaa,0x000000, 0.9);
 
     // A directional light shines from a specific direction. 
     // It acts like the sun, that means that all the rays produced are parallel. 
-    let shadowLight = new THREE.DirectionalLight(0xffffff, 0.9);
+    shadowLight = new THREE.DirectionalLight(0xffffff, 0.9);
 
     //Set the direction of the light
     shadowLight.position.set(150, 350, 350);
@@ -142,30 +133,59 @@ function createLights(){
     shadowLight.shadow.mapSize.height = 2048;
 
     // to activate the lights, just add them to the scene
-    // scene.add(hemisphereLight);
-    // scene.add(shadowLight);
+    scene.add(hemisphereLight);
+    scene.add(shadowLight);
 
-    const light = new THREE.AmbientLight(0xffffff);
-    scene.add(light);
+    // const light = new THREE.AmbientLight(0xffffff);
+    // scene.add(light);
 };
 
+
+let Sea = function(){
+    // create the geometry (shape) of the cylinder;
+	// the parameters are: 
+    // radius top, radius bottom, height, number of segments on the radius, number of segments vertically
+    let geometry = new THREE.CylinderGeometry(600, 600, 800, 40, 10);
+
+    // rotate the geometry on the x axis
+    geometry.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+
+    // create the material 
+    let material = new THREE.MeshPhongMaterial({
+        color: colors.blue,
+        transparent: true,
+        opacity: 0.6,
+        shading: THREE.FlatShading,
+    });
+
+    // To create an object in Three.js, we have to create a mesh 
+    // which is a combination of a geometry and some material
+    
+    this.mesh = new THREE.Mesh(geometry, material);
+    
+    // Allow the sea to receive shadows
+    this.mesh.receiveShadow = true;
+};
+
+
 // Instantiate the sea and add it to the scene:
+let sea;
+
 function createSea(){
-    let sea = new Sea();
+    sea = new Sea();
     
     // push it a little bit at the bottom of the scene
-    // sea.mesh.position.y = -600;
+    sea.mesh.position.y = -600;
 
     //add the mesh of the sea to the scene
     
-    renderer.setClearColor(0x000000);
+    // renderer.setClearColor(0x000000);
 
     scene.add(sea.mesh);
-    renderer.render(scene, camera);
+    // renderer.render(scene, camera);
 };
 
 function init(){
-
     //set app the scene, the camera and the renderer
     createScene();
 
@@ -184,3 +204,6 @@ function init(){
 };
 
 init();
+
+renderer.render(scene, camera);
+
