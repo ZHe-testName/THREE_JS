@@ -13,22 +13,10 @@ const colors = {
     blue: 0x68c3c0,
 };
 
-// const renderer = new THREE.WebGLRenderer({canvas: container}); 
 let scene,
 	camera, fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH,
-	renderer, container;
-
-// let height = window.innerHeight;
-// let width = window.innerWidth;
-
-// let asperateRatio = width / height;
-// let fieldOfView = 60;
-// let nearPlane = 1;
-// let farPlane = 10000;
-
-
-// let scene;
-
+    renderer, container;
+    
 window.addEventListener('load', init, false);
 //Create camera
 // let camera = new THREE.PerspectiveCamera(asperateRatio, fieldOfView, nearPlane, farPlane);
@@ -141,7 +129,7 @@ function createLights(){
 };
 
 
-let Sea = function(){
+const Sea = function(){
     // create the geometry (shape) of the cylinder;
 	// the parameters are: 
     // radius top, radius bottom, height, number of segments on the radius, number of segments vertically
@@ -178,12 +166,106 @@ function createSea(){
     sea.mesh.position.y = -600;
 
     //add the mesh of the sea to the scene
-    
-    // renderer.setClearColor(0x000000);
-
     scene.add(sea.mesh);
-    // renderer.render(scene, camera);
 };
+
+const Cloud = function(){
+    //создаем пустой контейнер который будет содржать 
+    //разлиные части облака
+    this.mesh = new THREE.Object3D();
+
+    //задаем геаметрию куба
+    //эта фигура будет дублироваться для создания облаков
+    let cubeGeom = new THREE.BoxGeometry(20, 20, 20);
+
+    //создаем простой белый материал для трюка
+    let cubeMat = new THREE.MeshPhongMaterial({
+        color: colors.white,
+    });
+
+    //дублируем куб рандомное количество раз
+    let nBlocks = 3 + Math.floor(Math.random() * 3);
+
+    for (let i = 0; i <nBlocks; i++){
+        //создаем меш для клонирования для клонирования геметроии
+        let m = new THREE.Mesh(cubeGeom, cubeMat);
+
+        //рандомно устанавливаем угол поворота кубов облака друг к кдругу
+        m.position.x = i * 15;
+        m.position.y = Math.random() * 10;
+        m.position.z = Math.random() * 10;
+
+        m.rotation.z = Math.random() * Math.PI * 2;
+        m.rotation.y = Math.random() * Math.PI * 2;
+
+        //рандомно установить размер куба
+        let s = 0.1 + Math.random() * 0.9;
+        m.scale.set(s, s, s);
+
+        //подключаем каждому кубу и облаку возможность отражать тени
+        m.castShadow = true;
+        m.receiveShadow = true;
+
+        //добавляем куб контейнеру который мы создали
+        this.mesh.add(m);
+    }
+};
+
+//опркделяем функцию объекта неба
+const Sky = function(){
+    //создаем пустой контейнер
+    this.mesh = new THREE.Object3D();
+
+    //выбираем количество облаков которые будут ростелатса по небу
+    this.nClouds = 20;
+
+    //равномероно распредвлаем облака по небу
+    //под равномерным углом
+    let stepAngle = Math.PI * 2 / this.nClouds;
+
+    //создаем облака
+    for (let i = 0; i < this.nClouds; i++){
+        let c = new Cloud();
+
+        //устанавсиваем угол и позицию каждого облака
+        //для этого мы используем немного тригонометрии
+        let a = stepAngle * i;//это конечный угол облака
+
+        let h = 750 + Math.random() * 200;//дистанция между цнтром осей
+        //и самим облаком
+
+        //мы просто конвертируем полярные коопдинаты(угол и дистанцию)
+        //в координаты декарта(x, y)
+        c.mesh.position.y = Math.sin(a) * h;
+        c.mesh.position.x = Math.cos(a) * h;
+        
+        //поворачиваем облако согласно позиции
+        c.mesh.rotation.z = a + Math.PI / 2;
+
+        //для улутшения результата мы разместим облака
+        //на различной глубине екрана
+        c.mesh.position.z = -400 - Math.random() * 400;
+
+        //еще установим различный масштаб для облака
+        //согласно глубине
+        let s = 1 + Math.random() * 2;
+        c.mesh.scale.set(s, s, s);
+
+        //не забываем добавить меш каждого облака на сцену
+        this.mesh.add(c.mesh);
+    }
+};
+
+//теперь создаем екземпляр неба и сдвигаем его центр
+//чуть в нижнюю часть экрана
+let sky;
+
+function createSky(){
+    sky = new Sky();
+
+    sky.mesh.position.y = -600;
+    scene.add(sky.mesh);
+}
 
 function init(){
     //set app the scene, the camera and the renderer
@@ -195,7 +277,7 @@ function init(){
     //insertion main object's
     // createPlane();
     createSea();
-    // createSky();
+    createSky();
 
     //start loop function that will update
     //object positions, and render the 
