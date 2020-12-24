@@ -18,8 +18,6 @@ let scene,
     renderer, container;
     
 window.addEventListener('load', init, false);
-//Create camera
-// let camera = new THREE.PerspectiveCamera(asperateRatio, fieldOfView, nearPlane, farPlane);
 
 function handleWindowResize() {
 	// update height and width of the renderer and the camera
@@ -361,7 +359,71 @@ function createPlane(){
     airplane.mesh.position.y = 100;
 
     scene.add(airplane.mesh);
+};
+
+//каждуое изменение в програме
+// нужно заново отрисовывать на странице
+//для этого создается функция loop
+function loop(){
+    //вращаем пропелле, море и небо
+    sea.mesh.rotation.z += 0.005;
+
+    sky.mesh.rotation.z += 0.01;
+
+    updatePlane();
+
+    //рендерим сцену
+    renderer.render(scene, camera);
+
+    //вызываем loop снова и снова
+    requestAnimationFrame(loop);
+};
+
+let mousePos = {
+    x: 0,
+    y: 0
+};
+
+function handleMouseMoving(event){
+    //мы нормализуем положение мыши
+    //конвертируя его в значение колебающееся от -1 до 1
+
+    //формула для горизонтальной оси
+    let tx = -1 + (event.clientX / WIDTH) * 2;
+
+    //для оси у мы длжны инвертировать формулу
+    //в 2-d пространстве ось у имеет противоположное направление чем ось у в 3-d
+    let ty = 1 - (event.clientY / WIDTH) * 2;
+
+    mousePos = {x: tx, y: ty};
+};
+
+function normalize(v,vmin,vmax,tmin, tmax){
+
+	var nv = Math.max(Math.min(v,vmax), vmin);
+	var dv = vmax-vmin;
+	var pc = (nv-vmin)/dv;
+	var dt = tmax-tmin;
+	var tv = tmin + (pc*dt);
+	return tv;
+
 }
+
+function updatePlane(){
+    //самолет будет передвигаться от -100 до 100 по оси х
+    //и от 5 до 175 по оси у
+    //в зависимости от положения мышки в границах от -1 до 1 по обеим осям 
+    //для этого используем функцию normalize
+
+    let targetX = normalize(mousePos.x, -1, 1, -100, 100);
+    let targetY = normalize(mousePos.y, -1, 1, 5, 175);
+
+    //обновляем позийию самолетика
+    airplane.mesh.position.x = targetX;
+    airplane.mesh.position.y = targetY;
+
+    airplane.propeller.rotation.x += 0.7;
+};
 
 function init(){
     //set app the scene, the camera and the renderer
@@ -375,13 +437,14 @@ function init(){
     createSea();
     createSky();
 
+    document.addEventListener('mousemove', handleMouseMoving, false);
     //start loop function that will update
     //object positions, and render the 
     //scene on each frame
-    // loop();
+    loop();
 };
 
-init();
+// init();
 
-renderer.render(scene, camera);
+// renderer.render(scene, camera);
 
