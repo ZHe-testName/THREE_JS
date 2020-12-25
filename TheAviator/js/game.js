@@ -569,7 +569,7 @@ const AirPlane = function(){
     this.mesh.add(wheelProtecRight);
 
     //покрышка шасси
-    let wheelTireGeom = new THREE.BoxGeometry(24, 24, 4);
+    let wheelTireGeom = new THREE.TorusBufferGeometry(8, 4, 8, 16);
     let wheelTireMat = new THREE.MeshPhongMaterial({
         color: colors.brownDark,
         shading: THREE.FlatShading
@@ -577,6 +577,7 @@ const AirPlane = function(){
 
     let wheelTireRight = new THREE.Mesh(wheelTireGeom, wheelTireMat);
     wheelTireRight.position.set(25, -28, 25);
+    console.log(wheelTireRight);
 
     //ось шасси
     let wheelAxisGeom = new THREE.BoxGeometry(10, 10, 6);
@@ -639,7 +640,7 @@ function createPlane(){
 
     airplane.mesh.scale.set(0.25, 0.25, 0.25);
     airplane.mesh.position.y = 100;
-    // airplane.mesh.position.z = 180;//удалить...
+    airplane.mesh.position.z = 100;//удалить...
 
     scene.add(airplane.mesh);
 };
