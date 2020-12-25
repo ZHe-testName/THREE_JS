@@ -8,12 +8,16 @@ body{
 	overflow: hidden;
 }
 
-.world {
+#world {
 	box-sizing: border-box;
 	position: absolute;
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
-	background: -webkit-linear-gradient(#e4e0ba, #f7d9aa);
-	background: linear-gradient(#e4e0ba, #f7d9aa);
+	/* background: -webkit-linear-gradient(#e4e0ba, #f7d9aa); */
+	background: linear-gradient(#f1f1b2, #e6bb6c);
+}
+
+.po{
+	color: #571209;
 }

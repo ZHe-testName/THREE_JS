@@ -11,6 +11,8 @@ const colors = {
     pink: 0xF5986E,
     yellow: 0xf4ce93,
     blue: 0x68c3c0,
+    blueGray: 0x869bc2,
+    cheeryWood: 0x571209,
 };
 
 let scene,
@@ -275,6 +277,18 @@ const AirPlane = function(){
         shading: THREE.FlatShading
     });
 
+    //у нас есть доступ к конкретным вершинам геометрии объекта
+    //через массив вершин
+    //мы можем присваивать им свои (х, у, z) координаты
+    cockpitGeom.vertices[4].y -= 4;
+    cockpitGeom.vertices[4].z += 20;
+    cockpitGeom.vertices[5].y -= 4;
+    cockpitGeom.vertices[5].z -= 20;
+    cockpitGeom.vertices[6].y += 30;
+    cockpitGeom.vertices[6].z += 20;
+    cockpitGeom.vertices[7].y += 30;
+    cockpitGeom.vertices[7].z -= 20;
+
     let cockpit = new THREE.Mesh(cockpitGeom, cockpitMat);
     cockpit.castShadow = true;
     cockpit.receiveShadow = true;
@@ -288,6 +302,15 @@ const AirPlane = function(){
         shading: THREE.FlatShading
     });
 
+    geomEngine.vertices[0].y -= 4;
+    geomEngine.vertices[0].z += 2;
+    geomEngine.vertices[1].y -= 4;
+    geomEngine.vertices[1].z -= 2;
+    geomEngine.vertices[2].y += 2;
+    geomEngine.vertices[2].z += 1;
+    geomEngine.vertices[3].y += 2;
+    geomEngine.vertices[3].z -= 1;
+
     let engine = new THREE.Mesh(geomEngine, matEngine);
     engine.position.x = 40;
     engine.castShadow = true;
@@ -296,57 +319,145 @@ const AirPlane = function(){
     this.mesh.add(engine);
 
     //создаем хвост
-    let geomTailPlane = new THREE.BoxGeometry(15, 20, 50, 1, 1, 1);
+    let geomTailPlane = new THREE.BoxGeometry(15, 20, 5, 1, 1, 1);
     let matTailPlane = new THREE.MeshPhongMaterial({
         color: colors.red,
         shading: THREE.FlatShading
     });
 
+    geomTailPlane.vertices[4].y -=4;
+    geomTailPlane.vertices[5].y -=4;
+
     let tailPlane = new THREE.Mesh(geomTailPlane, matTailPlane);
-    tailPlane.position.set(-25, 35, 0);
+    tailPlane.position.set(-25, 25, 0);
     tailPlane.castShadow = true;
     tailPlane.receiveShadow = true;
 
     this.mesh.add(tailPlane);
 
     //создаем крыло
-    let geomSideWing = new THREE.BoxGeometry(40, 8, 150, 1, 1, 1);
+    let geomSideWing = new THREE.BoxGeometry(40, 8, 130, 1, 1, 1);
     let matSideWing = new THREE.MeshPhongMaterial({
         color: colors.red,
         shading: THREE.FlatShading
     });
 
+    geomSideWing.vertices[4].y -= 5;
+    geomSideWing.vertices[5].y -= 5;
+
     let sideWing = new THREE.Mesh(geomSideWing, matSideWing);
+    sideWing.position.set(0, 15, 0);
     sideWing.castShadow = true;
     sideWing.receiveShadow = true;
     this.mesh.add(sideWing);
 
+    //обтекатель пилота
+    let windShieldGeom = new THREE.BoxGeometry(3, 15, 20, 1, 1, 1);
+    let windShieldMat = new THREE.MeshPhongMaterial({
+        color: colors.white,
+        transparent: true,
+        opacity: 0.3,
+        shading: THREE.FlatShading
+    });
+
+    let windshield = new THREE.Mesh(windShieldGeom, windShieldMat);
+    windshield.position.set(5, 27, 0);
+
+    windshield.castShadow = true;
+    windshield.receiveShadow = true;
+
+    this.mesh.add(windshield);
     //попеллер
     let geomPropeller = new THREE.BoxGeometry(20, 10 ,10, 1, 1, 1);
     let matPropeller = new THREE.MeshPhongMaterial({
-        color: colors.brown,
+        color: colors.blueGray,
         shading: THREE.FlatShading
     });
+
+    geomPropeller.vertices[4].y -= 5; 
+    geomPropeller.vertices[4].z += 5; 
+    geomPropeller.vertices[5].y -= 5;
+    geomPropeller.vertices[5].z -= 5;
+    geomPropeller.vertices[6].y += 5;
+    geomPropeller.vertices[6].z += 5;
+    geomPropeller.vertices[7].y += 5;
+    geomPropeller.vertices[7].z -= 5; 
+
     this.propeller = new THREE.Mesh(geomPropeller, matPropeller);
+    
     this.propeller.castShadow = true;
     this.propeller.receiveShadow = true;
 
     //лезвия
-    let geomBlade = new THREE.BoxGeometry(1, 100, 20, 1, 1, 1);
+    let geomBlade = new THREE.BoxGeometry(1, 80, 10, 1, 1, 1);
     let matBlade = new THREE.MeshPhongMaterial({
-        color: colors.brownDark,
+        color: colors.cheeryWood,
         shading: THREE.FlatShading
     });
-    let blade = new THREE.Mesh(geomBlade, matBlade);
-    blade.position.set(8, 0, 0);
-    blade.castShadow = true;
-    blade.receiveShadow = true;
 
-    this.propeller.add(blade);
+    let blade1 = new THREE.Mesh(geomBlade, matBlade);
+    blade1.position.set(8, 0, 0);
+    blade1.castShadow = true;
+    blade1.receiveShadow = true;
+
+    let blade2 = new THREE.Mesh(geomBlade, matBlade);
+    blade2.rotation.x = Math.PI / 2;
+    blade2.position.x += 5;
+    blade2.castShadow = true;
+    blade2.receiveShadow = true;
+
+    this.propeller.add(blade1);
+    this.propeller.add(blade2);
     this.propeller.position.set(50, 0, 0);
 
     this.mesh.add(this.propeller);
 
+    //создаем шасси
+
+    //защита шасси
+    let geomProtecWheelR = new THREE.BoxGeometry(30, 15, 10, 1, 1, 1);
+    let matProtecWheelR = new THREE.MeshPhongMaterial({
+        color: colors.red,
+        shading: THREE.FlatShading,
+    });
+
+    let wheelProtecRight = new THREE.Mesh(geomProtecWheelR, matProtecWheelR);
+    wheelProtecRight.position.set(25, -20, 25);
+
+    this.mesh.add(wheelProtecRight);
+
+    //покрышка шасси
+    let wheelTireGeom = new THREE.BoxGeometry(24, 24, 4);
+    let wheelTireMat = new THREE.MeshPhongMaterial({
+        color: colors.brownDark,
+        shading: THREE.FlatShading
+    });
+
+    let wheelTireRight = new THREE.Mesh(wheelTireGeom, wheelTireMat);
+    wheelTireRight.position.set(25, -28, 25);
+
+    //ось шасси
+    let wheelAxisGeom = new THREE.BoxGeometry(10, 10, 6);
+    let wheelAxisMat = new THREE.MeshPhongMaterial({
+        color: colors.blueGray,
+        shading: THREE.FlatShading
+    });
+
+    let wheelAxis = new THREE.Mesh(wheelAxisGeom, wheelAxisMat);
+
+    wheelTireRight.add(wheelAxis);
+
+    this.mesh.add(wheelTireRight);
+
+    let wheelProtecLeft = wheelProtecRight.clone();
+    wheelProtecLeft.position.z = -wheelProtecRight.position.z;
+
+    this.mesh.add(wheelProtecLeft);
+
+    let wheelTireLeft = wheelTireRight.clone();
+    wheelTireLeft.position.z = -wheelTireRight.position.z;
+
+    this.mesh.add(wheelTireLeft);
 };
 
 //добавляем самолет на сцену
@@ -357,8 +468,26 @@ function createPlane(){
 
     airplane.mesh.scale.set(0.25, 0.25, 0.25);
     airplane.mesh.position.y = 100;
+    airplane.mesh.position.z = 110;//удалить...
+    // airplane.mesh.rotation.y = 200;//удалить...
 
     scene.add(airplane.mesh);
+};
+
+function updatePlane(){
+    //самолет будет передвигаться от -100 до 100 по оси х
+    //и от 5 до 175 по оси у
+    //в зависимости от положения мышки в границах от -1 до 1 по обеим осям 
+    //для этого используем функцию normalize
+
+    let targetX = normalize(mousePos.x, -1, 1, -100, 100);
+    let targetY = normalize(mousePos.y, -1, 1, 5, 175);
+
+    //обновляем позийию самолетика
+    airplane.mesh.position.x = targetX;
+    airplane.mesh.position.y = targetY;
+
+    airplane.propeller.rotation.x += 0.4;
 };
 
 //каждуое изменение в програме
@@ -407,22 +536,6 @@ function normalize(v,vmin,vmax,tmin, tmax){
 	var tv = tmin + (pc*dt);
 	return tv;
 
-}
-
-function updatePlane(){
-    //самолет будет передвигаться от -100 до 100 по оси х
-    //и от 5 до 175 по оси у
-    //в зависимости от положения мышки в границах от -1 до 1 по обеим осям 
-    //для этого используем функцию normalize
-
-    let targetX = normalize(mousePos.x, -1, 1, -100, 100);
-    let targetY = normalize(mousePos.y, -1, 1, 5, 175);
-
-    //обновляем позийию самолетика
-    airplane.mesh.position.x = targetX;
-    airplane.mesh.position.y = targetY;
-
-    airplane.propeller.rotation.x += 0.7;
 };
 
 function init(){
