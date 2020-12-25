@@ -458,6 +458,27 @@ const AirPlane = function(){
     wheelTireLeft.position.z = -wheelTireRight.position.z;
 
     this.mesh.add(wheelTireLeft);
+
+    //задне шаси
+    let wheelTireBack = wheelTireRight.clone();
+    wheelTireBack.scale.set(0.5, 0.5, 0.5);
+    wheelTireBack.position.set(-35, -5, 0);
+
+    this.mesh.add(wheelTireBack);
+
+    //задняя подвеска
+    let suspensionGeom = new THREE.BoxGeometry(4, 20, 4);
+    suspensionGeom.applyMatrix(new THREE.Matrix4().makeTranslation(0, 10, 0));
+    let suspensionMat = new THREE.MeshPhongMaterial({
+        color: colors.blueGray,
+        shading: THREE.FlatShading
+    });
+
+    let suspension = new THREE.Mesh(suspensionGeom, suspensionMat);
+    suspension.position.set(-35, -5, 0);
+    suspension.rotation.z = -0.6;
+    
+    this.mesh.add(suspension);
 };
 
 //добавляем самолет на сцену
@@ -469,7 +490,7 @@ function createPlane(){
     airplane.mesh.scale.set(0.25, 0.25, 0.25);
     airplane.mesh.position.y = 100;
     airplane.mesh.position.z = 110;//удалить...
-    // airplane.mesh.rotation.y = 200;//удалить...
+    airplane.mesh.rotation.y = -200;//удалить...
 
     scene.add(airplane.mesh);
 };
