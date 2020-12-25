@@ -267,6 +267,130 @@ function createSky(){
     scene.add(sky.mesh);
 };
 
+const Pilot = function(){
+    this.mesh = new THREE.Object3D();
+    this.mesh.name = 'pilot';
+
+    //эта переменая нужна для анимаци волос позже
+    this.angleHairs = 0;
+
+    //создадим объект тела пилота сложив два куба в месте
+
+    //тело
+    let pilotBodyGeom = new THREE.BoxGeometry(15, 15, 15);
+    let pilotBodyMat = new THREE.MeshPhongMaterial({
+        color: colors.brown,
+        shading: THREE.FlatShading
+    });
+
+    let pilotBody = new THREE.Mesh(pilotBodyGeom, pilotBodyMat);
+    pilotBody.position.set(2,-10, 0);
+
+    this.mesh.add(pilotBody);
+
+    //голова
+    let pilotHeadGeom = new THREE.BoxGeometry(10, 10, 10);
+    let pilotHeadMat = new THREE.MeshLambertMaterial({
+        color: colors.pink,
+        shading: THREE.FlatShading
+    });
+
+    let pilotHead = new THREE.Mesh(pilotHeadGeom, pilotHeadMat);
+    pilotHead.position.set(0, 2, 0);
+    this.mesh.add(pilotHead);
+
+    //элемент для анимационного слоя прически
+    let hairGeom = new THREE.BoxGeometry(4, 4, 4);
+    let hairMat = new THREE.MeshLambertMaterial({
+        color: colors.brown,
+    });
+
+    let hair = new THREE.Mesh(hairGeom, hairMat);
+
+    //выравниваем поверхность элементв волос по низу для того чтобы ее было легче масштабировать
+    hair.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,2,0));
+
+    //создадим контейнер для волос
+    let hairs = new THREE.Object3D();
+
+    //создадим контейнер для верхушки волос
+    //собственно его мы и будем анимировать
+    this.hairsTop = new THREE.Object3D();
+
+    //создадим поверхность волос на верхушке для анимации
+    //и разместим их в сетке 3х4
+    for (let i = 0; i < 12; i++){
+        let h = hair.clone();
+        let col = i % 3;
+        let row = Math.floor(i / 3);
+
+        let startPosX = -4;
+        let startPosZ = -4;
+
+        h.position.set(startPosX + row * 4, 0, startPosZ + col * 4);
+
+        this.hairsTop.add(h);
+    };
+
+    hairs.add(this.hairsTop);
+
+    //создаем волосы со стороны лица
+    let hairSideGeom = new THREE.BoxGeometry(12, 4, 2);
+    hairSideGeom.applyMatrix(new THREE.Matrix4().makeTranslation(-4, 4, 0));
+
+    let hairSideRight = new THREE.Mesh(hairSideGeom, hairMat);
+    let hairSideLeft = hairSideRight.clone();
+
+    hairSideRight.position.set(8, -2, 6);
+    hairSideLeft.position.set(8, -2, -6);
+
+    hairs.add(hairSideLeft);
+    hairs.add(hairSideRight);
+
+    //создадим волосы на задней части головы
+    let hairsBackGeom = new THREE.BoxGeometry(2, 8, 10);
+    let hairBack = new THREE.Mesh(hairsBackGeom, hairMat);
+    
+    hairBack.position.set(-1, -4, 0);
+    hairs.add(hairBack);
+
+    hairs.position.set(-5, 5, 0);
+
+    this.mesh.add(hairs);
+
+    //делаем очки
+    let glassGeom = new THREE.BoxGeometry(5, 5, 5);
+    let glassMat = new THREE.MeshPhongMaterial({
+        color: colors.blueGray
+    });
+
+    let glassRight = new THREE.Mesh(glassGeom, glassMat);
+    glassRight.position.set(6, 3, 3);
+
+    let glassLeft = glassRight.clone();
+    glassLeft.position.z = -glassRight.position.z;
+
+    let glassAGeom = new THREE.BoxGeometry(11, 1, 11);
+    let glassA = new THREE.Mesh(glassAGeom, glassMat);
+    glassA.position.set(0, 3, 0);
+
+    this.mesh.add(glassRight);
+    this.mesh.add(glassLeft);
+    this.mesh.add(glassA);
+
+    //создадим уши
+    let earGeom = new THREE.BoxGeometry(2, 3, 2);
+
+    let earLeft = new THREE.Mesh(earGeom, pilotHeadMat);
+    earLeft.position.set(0, 2, -6);
+
+    let earRight = earLeft.clone();
+    earRight.position.set(0, 2, 6);
+
+    this.mesh.add(earRight);
+    this.mesh.add(earLeft);
+};
+
 const AirPlane = function(){
     this.mesh = new THREE.Object3D();
 
@@ -361,7 +485,7 @@ const AirPlane = function(){
     });
 
     let windshield = new THREE.Mesh(windShieldGeom, windShieldMat);
-    windshield.position.set(5, 27, 0);
+    windshield.position.set(13, 27, 0);
 
     windshield.castShadow = true;
     windshield.receiveShadow = true;
@@ -479,6 +603,14 @@ const AirPlane = function(){
     suspension.rotation.z = -0.6;
     
     this.mesh.add(suspension);
+
+    this.pilot = new Pilot();
+    this.pilot.mesh.position.set(-2, 27, 0);
+
+    this.mesh.add(this.pilot.mesh);
+
+    this.mesh.castShadow = true;
+    this.mesh.receiveShadow = true;
 };
 
 //добавляем самолет на сцену
@@ -489,8 +621,7 @@ function createPlane(){
 
     airplane.mesh.scale.set(0.25, 0.25, 0.25);
     airplane.mesh.position.y = 100;
-    airplane.mesh.position.z = 110;//удалить...
-    airplane.mesh.rotation.y = -200;//удалить...
+    airplane.mesh.position.z = 180;//удалить...
 
     scene.add(airplane.mesh);
 };
