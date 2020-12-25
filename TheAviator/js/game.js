@@ -341,8 +341,8 @@ const Pilot = function(){
     let hairSideRight = new THREE.Mesh(hairSideGeom, hairMat);
     let hairSideLeft = hairSideRight.clone();
 
-    hairSideRight.position.set(8, -2, 6);
-    hairSideLeft.position.set(8, -2, -6);
+    hairSideRight.position.set(8, -4, 6);
+    hairSideLeft.position.set(8, -4, -6);
 
     hairs.add(hairSideLeft);
     hairs.add(hairSideRight);
@@ -389,6 +389,24 @@ const Pilot = function(){
 
     this.mesh.add(earRight);
     this.mesh.add(earLeft);
+};
+
+Pilot.prototype.updateHairs = function (){
+    //получим волосы
+    let hairs = this.hairsTop.children;
+
+    //обновляем их согласно угла angleHairs
+    for (let i = 0; i < hairs.length; i++){
+        let h = hairs[i];
+
+        //будем уменьшать и увиличивать каждый элемент в размере циклично
+        //в границах от 75% до 100%
+        h.scale.y = 0.75 + Math.cos(this.angleHairs + 1 / 3) * 0.25;
+        
+        //инкрементируюм угол для следующего фрейма
+        this.angleHairs += 0.966;
+    }
+
 };
 
 const AirPlane = function(){
@@ -621,7 +639,7 @@ function createPlane(){
 
     airplane.mesh.scale.set(0.25, 0.25, 0.25);
     airplane.mesh.position.y = 100;
-    airplane.mesh.position.z = 180;//удалить...
+    // airplane.mesh.position.z = 180;//удалить...
 
     scene.add(airplane.mesh);
 };
@@ -655,6 +673,9 @@ function loop(){
 
     //рендерим сцену
     renderer.render(scene, camera);
+
+    //розвеваем волосы
+    airplane.pilot.updateHairs(); 
 
     //вызываем loop снова и снова
     requestAnimationFrame(loop);
