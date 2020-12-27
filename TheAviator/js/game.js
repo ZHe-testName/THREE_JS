@@ -161,38 +161,11 @@ const Sea = function(){
             angle: Math.random() * Math.PI * 2,
 
             //случайная высота
-            amp: 5 * Math.random() * 5,
+            amp: 5 * Math.random() * 6,
 
             //случайная скорость между 0.016 и 0.032 кфвианами на фрейм
             speed: 0.016 + Math.random() * 0.032,
         })
-    };
-
-    //функция которая будет вызываться каждый фрейм
-    //для обновления координат вершин
-    //тем самым имитируя движение волн
-    Sea.prototype.moveWaves = function (){
-        //получим вершины
-        let verts = this.mesh.geometry.vertices;
-        let l = verts.length;
-
-        for (let i = 0; i < l; i++){
-            var v = verts[i];
-
-            //получим данные относящиеся к ней
-            let verProps = this.waves[i];
-
-            //обновим позицию вершины
-            v.x = verProps.x + Math.cos(verProps.angle) * verProps.amp;
-            v.y = verProps.y + Math.cos(verProps.angle) * verProps.amp;
-
-            //увиличиваем угол к следующему фрейму
-            verProps.angle += verProps.speed;
-        };
-
-        this.mesh.geometry.vercitiesNeedUpdate = true;
-
-        sea.mesh.rotation.z += 0.005;
     };
 
     // create the material 
@@ -210,6 +183,33 @@ const Sea = function(){
     
     // Allow the sea to receive shadows
     this.mesh.receiveShadow = true;
+};
+
+//функция которая будет вызываться каждый фрейм
+//для обновления координат вершин
+//тем самым имитируя движение волн
+Sea.prototype.moveWaves = function (){
+    //получим вершины
+    let verts = this.mesh.geometry.vertices;
+    let l = verts.length;
+
+    for (let i = 0; i < l; i++){
+        var v = verts[i];
+
+        //получим данные относящиеся к ней
+        let verProps = this.waves[i];
+
+        //обновим позицию вершины
+        v.x = verProps.x + Math.cos(verProps.angle) * verProps.amp;
+        v.y = verProps.y + Math.sin(verProps.angle) * verProps.amp;
+
+        //увиличиваем угол к следующему фрейму
+        verProps.angle += verProps.speed;
+    };
+
+    this.mesh.geometry.verticesNeedUpdate = true;
+
+    sea.mesh.rotation.z += 0.005;
 };
 
 
@@ -712,7 +712,7 @@ function updatePlane(){
     //для этого используем функцию normalize
 
     let targetX = normalize(mousePos.x, -0.75, 0.75, -100, 100);
-    let targetY = normalize(mousePos.y, -0.75, 0.75, 25, 175);
+    let targetY = normalize(mousePos.y, -0.75, 0.75, -100, 175);
 
     //перемещаем самолет в каждом кадре добавляя часть растояния
     airplane.mesh.position.y += (targetY - airplane.mesh.position.y) * 0.1;
@@ -721,8 +721,15 @@ function updatePlane(){
 	airplane.mesh.rotation.z = (targetY - airplane.mesh.position.y) * 0.0128;
 	airplane.mesh.rotation.x = (airplane.mesh.position.y - targetY) * 0.0064;
 
-    airplane.propeller.rotation.x += 0.4;
+    airplane.propeller.rotation.x += 0.7;
 };
+
+//функция для перемещения камеры
+//относительно положения мыши по оси х
+function updateCameraFov(){
+    camera.fov = normalize(mousePos.x,-1,1,40, 70);
+    camera.updateProjectionMatrix();
+}
 
 //каждуое изменение в програме
 // нужно заново отрисовывать на странице
@@ -742,6 +749,7 @@ function loop(){
     //розвеваем волосы
     airplane.pilot.updateHairs(); 
 
+    updateCameraFov();
     //вызываем loop снова и снова
     requestAnimationFrame(loop);
 };
