@@ -109,8 +109,7 @@ var Pilot = function(){
   var hairGeom = new THREE.BoxGeometry(4,4,4);
   var hairMat = new THREE.MeshLambertMaterial({color:Colors.brown});
   var hair = new THREE.Mesh(hairGeom, hairMat);
-  hair.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,2,0));
-  var hairs = new THREE.Object3D();
+
 
   this.hairsTop = new THREE.Object3D();
 
@@ -270,7 +269,7 @@ var AirPlane = function(){
 
   this.propeller.add(blade1);
   this.propeller.add(blade2);
-  this.propeller.position.set(60,0,0);
+  this.propeller.position.set(50,0,0);
   this.mesh.add(this.propeller);
 
   var wheelProtecGeom = new THREE.BoxGeometry(30,15,10,1,1,1);

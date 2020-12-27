@@ -130,13 +130,68 @@ function createLights(){
 
 
 const Sea = function(){
-    // create the geometry (shape) of the cylinder;
-	// the parameters are: 
-    // radius top, radius bottom, height, number of segments on the radius, number of segments vertically
+    //создаем геометрию цилиндра и задаем ему изначальные данные
+    //верхний радиус, нижний радиус, высоту, кол-во радиальных сегментов, кол-во вертикальных сегментов
     let geometry = new THREE.CylinderGeometry(600, 600, 800, 40, 10);
 
-    // rotate the geometry on the x axis
+    // поворачиваем геометрию по оси х
     geometry.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+
+    //обеденяя вершины мы создаем непрерывность волн
+    geometry.mergeVertices();
+    
+    //получи количество вершин
+    let l = geometry.vertices.length;
+
+    //создаем массив дла записи данных по каждой вершине
+    this.waves = [];
+
+    for (let i = 0; i < l; i++){
+        //получим каждую из вершин
+        let v = geometry.vertices[i];
+
+        //запишем данные связаные с вершиной
+        this.waves.push({
+            x: v.x,
+            y: v.y,
+            z: v.z,
+            //случайный угол
+            angle: Math.random() * Math.PI * 2,
+
+            //случайная высота
+            amp: 5 * Math.random() * 5,
+
+            //случайная скорость между 0.016 и 0.032 кфвианами на фрейм
+            speed: 0.016 + Math.random() * 0.032,
+        })
+    };
+
+    //функция которая будет вызываться каждый фрейм
+    //для обновления координат вершин
+    //тем самым имитируя движение волн
+    Sea.prototype.moveWaves = function (){
+        //получим вершины
+        let verts = this.mesh.geometry.vertices;
+        let l = verts.length;
+
+        for (let i = 0; i < l; i++){
+            var v = verts[i];
+
+            //получим данные относящиеся к ней
+            let verProps = this.waves[i];
+
+            //обновим позицию вершины
+            v.x = verProps.x + Math.cos(verProps.angle) * verProps.amp;
+            v.y = verProps.y + Math.cos(verProps.angle) * verProps.amp;
+
+            //увиличиваем угол к следующему фрейму
+            verProps.angle += verProps.speed;
+        };
+
+        this.mesh.geometry.vercitiesNeedUpdate = true;
+
+        sea.mesh.rotation.z += 0.005;
+    };
 
     // create the material 
     let material = new THREE.MeshPhongMaterial({
@@ -359,13 +414,14 @@ const Pilot = function(){
     this.mesh.add(hairs);
 
     //делаем очки
-    let glassGeom = new THREE.BoxGeometry(5, 5, 5);
+    let glassGeom = new THREE.CylinderGeometry(4, 4, 5, 10);
     let glassMat = new THREE.MeshPhongMaterial({
         color: colors.blueGray
     });
 
     let glassRight = new THREE.Mesh(glassGeom, glassMat);
     glassRight.position.set(6, 3, 3);
+    glassRight.rotation.z = Math.PI / 2;
 
     let glassLeft = glassRight.clone();
     glassLeft.position.z = -glassRight.position.z;
@@ -413,7 +469,8 @@ const AirPlane = function(){
     this.mesh = new THREE.Object3D();
 
     //создаем кабину
-    let cockpitGeom = new THREE.BoxGeometry(60 ,50, 50, 1, 1, 1);
+    let cockpitGeom = new THREE.BoxGeometry(60,50,50,1,1,1);
+    // let cockpitGeom = new THREE.CylinderBufferGeometry( 14, 30, 60, 8);
     let cockpitMat = new THREE.MeshPhongMaterial({
         color: colors.red,
         shading: THREE.FlatShading
@@ -432,6 +489,8 @@ const AirPlane = function(){
     cockpitGeom.vertices[7].z -= 20;
 
     let cockpit = new THREE.Mesh(cockpitGeom, cockpitMat);
+    // cockpit.rotation.z = Math.PI / 2;
+    // cockpit.rotation.x = 2;
     cockpit.castShadow = true;
     cockpit.receiveShadow = true;
 
@@ -577,7 +636,6 @@ const AirPlane = function(){
 
     let wheelTireRight = new THREE.Mesh(wheelTireGeom, wheelTireMat);
     wheelTireRight.position.set(25, -28, 25);
-    console.log(wheelTireRight);
 
     //ось шасси
     let wheelAxisGeom = new THREE.BoxGeometry(10, 10, 6);
@@ -640,7 +698,7 @@ function createPlane(){
 
     airplane.mesh.scale.set(0.25, 0.25, 0.25);
     airplane.mesh.position.y = 100;
-    airplane.mesh.position.z = 100;//удалить...
+    // airplane.mesh.position.z = 100;//удалить...
 
     scene.add(airplane.mesh);
 };
@@ -666,7 +724,8 @@ function updatePlane(){
 //для этого создается функция loop
 function loop(){
     //вращаем пропелле, море и небо
-    sea.mesh.rotation.z += 0.005;
+    // sea.mesh.rotation.z += 0.005;
+    sea.moveWaves();
 
     sky.mesh.rotation.z += 0.01;
 
@@ -711,6 +770,8 @@ function normalize(v,vmin,vmax,tmin, tmax){
 	return tv;
 
 };
+
+
 
 function init(){
     //set app the scene, the camera and the renderer
