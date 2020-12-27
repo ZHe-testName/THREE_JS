@@ -124,6 +124,8 @@ function createLights(){
     scene.add(hemisphereLight);
     scene.add(shadowLight);
 
+    let ambientLight = new THREE.AmbientLight(0xdc8874, .5);
+    scene.add(ambientLight);
     // const light = new THREE.AmbientLight(0xffffff);
     // scene.add(light);
 };
@@ -709,12 +711,15 @@ function updatePlane(){
     //в зависимости от положения мышки в границах от -1 до 1 по обеим осям 
     //для этого используем функцию normalize
 
-    let targetX = normalize(mousePos.x, -1, 1, -100, 100);
-    let targetY = normalize(mousePos.y, -1, 1, 5, 175);
+    let targetX = normalize(mousePos.x, -0.75, 0.75, -100, 100);
+    let targetY = normalize(mousePos.y, -0.75, 0.75, 25, 175);
 
-    //обновляем позийию самолетика
-    airplane.mesh.position.x = targetX;
-    airplane.mesh.position.y = targetY;
+    //перемещаем самолет в каждом кадре добавляя часть растояния
+    airplane.mesh.position.y += (targetY - airplane.mesh.position.y) * 0.1;
+
+	// повернем самолетик пропорционально оставшемуся расстоянию
+	airplane.mesh.rotation.z = (targetY - airplane.mesh.position.y) * 0.0128;
+	airplane.mesh.rotation.x = (airplane.mesh.position.y - targetY) * 0.0064;
 
     airplane.propeller.rotation.x += 0.4;
 };
